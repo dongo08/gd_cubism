@@ -7,6 +7,7 @@
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
 #include <godot_cpp/classes/image.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 
 #ifdef GD_CUBISM_USE_RENDERER_2D
     #include <private/internal_cubism_renderer_2d.hpp>
@@ -305,26 +306,56 @@ void InternalCubismUserModel::expression_stop() {
 
 CubismMotionQueueEntryHandle InternalCubismUserModel::motion_start(const char* group, const int32_t no, const int32_t priority, const bool loop, const bool loop_fade_in, void* custom_data) {
 
+    // 停止所有正在播放的 motion，防止叠加
+    this->_motionManager->StopAllMotions();
+
+    // 将模型所有参数重置到默认值，清除旧 motion 的残留
+    if (this->_model != nullptr) {
+        for (csmInt32 i = 0; i < this->_model->GetParameterCount(); i++) {
+            this->_model->SetParameterValue(i, this->_model->GetParameterDefaultValue(i));
+        }
+        this->_model->SaveParameters();
+    }
+
     if (priority == GDCubismUserModel::Priority::PRIORITY_FORCE) {
         this->_motionManager->SetReservePriority(priority);
     } else if (!this->_motionManager->ReserveMotion(priority)) {
         return InvalidMotionQueueEntryHandleValue;
     }
 
-    csmString name = Utils::CubismString::GetFormatedString("%s_%d", group, no);
+    // 用 Godot String 比对（大小写不敏感），避免 csmString 逐字节 UTF-8 比对问题
+    String gd_name; gd_name.parse_utf8(Utils::CubismString::GetFormatedString("%s_%d", group, no).GetRawString());
+    CubismMotion* motion = nullptr;
+    for(csmMap<csmString, CubismMotion*>::const_iterator it = this->_map_motion.Begin(); it != this->_map_motion.End(); it++) {
+        String gd_key; gd_key.parse_utf8(it->First.GetRawString());
+        if(gd_key.to_lower() == gd_name.to_lower()) {
+            motion = it->Second;
+            break;
+        }
+    }
 
-    CubismMotion* motion = this->_map_motion[name];
+    if(motion == nullptr) {
+        UtilityFunctions::print("[GDCubism] Motion not found: ", gd_name);
+        UtilityFunctions::print("[GDCubism] Available keys:");
+        for(csmMap<csmString, CubismMotion*>::const_iterator it = this->_map_motion.Begin(); it != this->_map_motion.End(); it++) {
+            String gd_key; gd_key.parse_utf8(it->First.GetRawString());
+            UtilityFunctions::print("  ", gd_key);
+        }
+        return InvalidMotionQueueEntryHandleValue;
+    }
 
-    if(motion == nullptr ) return InvalidMotionQueueEntryHandleValue;
-
-    motion->IsLoop(loop);
-    motion->IsLoopFadeIn(loop_fade_in);
+    motion->SetLoop(loop);
+    motion->SetLoopFadeIn(loop_fade_in);
     motion->SetFinishedMotionHandler(GDCubismUserModel::on_motion_finished);
     #ifdef CUBISM_MOTION_CUSTOMDATA
     motion->SetFinishedMotionCustomData(custom_data);
     #endif // CUBISM_MOTION_CUSTOMDATA
 
-    return this->_motionManager->StartMotionPriority(motion, false, priority);
+    CubismMotionQueueEntryHandle handle = this->_motionManager->StartMotionPriority(motion, false, priority);
+    if (handle == InvalidMotionQueueEntryHandleValue) {
+        UtilityFunctions::print("[GDCubism] StartMotionPriority failed for: ", gd_name);
+    }
+    return handle;
 }
 
 
@@ -354,11 +385,15 @@ void InternalCubismUserModel::expression_load() {
         String expression_pathname = this->_model_pathname.get_base_dir().path_join(gd_filename);
 
         PackedByteArray buffer = FileAccess::get_file_as_bytes(expression_pathname);
+        if(buffer.size() == 0) continue;
+
         CubismExpressionMotion* motion = static_cast<CubismExpressionMotion*>(this->LoadExpression(
             buffer.ptr(),
             buffer.size(),
             this->_model_setting->GetExpressionName(i)
         ));
+
+        if(motion == nullptr) continue;
 
         if(this->_map_expression[name] != nullptr) {
             ACubismMotion::Delete(this->_map_expression[name]);
@@ -429,11 +464,15 @@ void InternalCubismUserModel::motion_load() {
             String motion_pathname = this->_model_pathname.get_base_dir().path_join(gd_filename);
 
             PackedByteArray buffer = FileAccess::get_file_as_bytes(motion_pathname);
+            if(buffer.size() == 0) continue;
+
             CubismMotion* motion = static_cast<CubismMotion*>(this->LoadMotion(
                 buffer.ptr(),
                 buffer.size(),
                 name.GetRawString()
             ));
+
+            if(motion == nullptr) continue;
 
             csmFloat32 fade_time_sec = this->_model_setting->GetMotionFadeInTimeValue(group, im);
             if (fade_time_sec >= 0.0f) {

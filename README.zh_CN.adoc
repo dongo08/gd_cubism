@@ -1,0 +1,123 @@
+= Cubism for GDScript
+:encoding: utf-8
+:lang: zh_CN
+:author: MizunagiKB <mizukb@live.jp>
+:copyright: 2023 MizunagiKB
+:doctype: book
+:nofooter:
+:toc: left
+:toclevels: 3
+:source-highlighter: highlight.js
+:icons: font
+:experimental:
+:stylesdir: ./docs/res/theme/css
+:stylesheet: mizunagi-works.css
+ifdef::env-github,env-vscode[]
+:adocsuffix: .adoc
+endif::env-github,env-vscode[]
+ifndef::env-github,env-vscode[]
+:adocsuffix: .html
+endif::env-github,env-vscode[]
+
+
+ifdef::env-github,env-vscode[]
+link:README.adoc[日文] / link:README.en.adoc[英文] / link:README.zh_CN.adoc[中文]
+endif::env-github,env-vscode[]
+
+
+== 关于 GDCubism
+
+本软件（以下简称 GDCubism）是一个**非官方**的 GDExtension，使您可以通过 GDScript 或 C# 使用 link:https://www.live2d.com/download/cubism-sdk/[Live2D Cubism SDK]。
+
+[NOTE]
+====
+此 GDExtension 适用于 Godot Engine 4.3 及以上版本。（如果需要在 4.1 或 4.2 中使用，请使用 link:https://github.com/MizunagiKB/gd_cubism/releases/tag/v0.8.2-godot4.1[v0.8.2-godot4.1]）
+====
+
+[IMPORTANT]
+====
+从 0.9 版本开始，渲染方式改为直接渲染，大幅降低了 Godot Engine 的处理负载和 GPU 内存消耗。
+
+同时也有一些变更。最大的变化是 _GDCubismUserModel_ 不再是 _SubViewport_。
+
+如果希望像以前一样使用，请将 _GDCubismUserModel_ 放在 _SubViewport_ 下使用。（关于此变更的演示已添加 `demo_fade.tscn`）
+====
+
+GDCubism 内部使用了 Live2D 公司公开的 link:https://github.com/Live2D/CubismNativeFramework[Cubism Native Framework]。
+
+请不要就 GDCubism 的相关问题联系开发方 Live2D 公司。
+
+
+== 支持的平台
+
+[cols="2",frame=none,grid=none]
+|===
+>|Windows
+a|
+* x86_32
+* x86_64
+
+>|macOS
+a|
+* x86_64
+* arm64
+* universal
+
+>|Linux
+a|
+* x86_64
+
+>|iOS
+a|
+* arm64 (实验性)
+* universal (实验性)
+
+>|Android
+a|
+* armv7 (实验性)
+* arm64v8 (实验性)
+|===
+
+
+== 许可证
+
+[NOTE]
+====
+GDCubism 通过链接依赖的外部库，会形成不同使用条件的许可证。 +
+如果您考虑将 GDCubism 用于分发或销售，请确认以下页面中记载的许可证。
+====
+
+ifdef::env-github,env-vscode[]
+* link:https://mizunagikb.github.io/gd_cubism/gd_cubism/0.6/ja/license.html[许可证]
+
+== 构建方法
+
+* link:https://mizunagikb.github.io/gd_cubism/gd_cubism/0.6/ja/build.html[构建]
+
+== 使用方法
+
+* link:https://mizunagikb.github.io/gd_cubism/gd_cubism/0.6/ja/usage.html[使用说明]
+endif::env-github,env-vscode[]
+
+ifndef::env-github,env-vscode[]
+* link:./docs-src/modules/ROOT/pages/zh_CN/license.adoc[许可证]
+
+== 构建方法
+
+* link:./docs-src/modules/ROOT/pages/zh_CN/build.adoc[构建]
+
+== 使用方法
+
+* link:./docs-src/modules/ROOT/pages/zh_CN/usage.adoc[使用说明]
+endif::env-github,env-vscode[]
+
+
+== 相关信息
+
+* Live2D
+** link:https://www.live2d.com/[Live2D Cubism]
+** link:https://www.live2d.com/download/cubism-sdk/[Live2D Cubism SDK]
+** link:https://github.com/Live2D[Live2D (GitHub)]
+** link:https://github.com/Live2D/CubismNativeFramework[CubismNativeFramework (GitHub)]
+* MizunagiKB
+** link:https://github.com/MizunagiKB/gd_cubism[MizunagiKB / gd_cubism (GitHub)]

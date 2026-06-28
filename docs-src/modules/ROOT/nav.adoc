@@ -35,3 +35,22 @@
 ** xref:en/api/gd_cubism_part_opacity.adoc[]
 ** xref:en/api/gd_cubism_user_model.adoc[]
 ** xref:en/api/gd_cubism_value_abs.adoc[]
+
+.zh_CN
+* xref:zh_CN/index.adoc[]
+* xref:zh_CN/license.adoc[]
+* xref:zh_CN/build.adoc[]
+* xref:zh_CN/usage.adoc[]
+* API
+** xref:zh_CN/api/gd_cubism_effect.adoc[]
+** xref:zh_CN/api/gd_cubism_effect_breath.adoc[]
+** xref:zh_CN/api/gd_cubism_effect_custom.adoc[]
+** xref:zh_CN/api/gd_cubism_effect_eye_blink.adoc[]
+** xref:zh_CN/api/gd_cubism_effect_hit_area.adoc[]
+** xref:zh_CN/api/gd_cubism_effect_target_point.adoc[]
+** xref:zh_CN/api/gd_cubism_motion_entry.adoc[]
+** xref:zh_CN/api/gd_cubism_motion_queue_entry_handle.adoc[]
+** xref:zh_CN/api/gd_cubism_parameter.adoc[]
+** xref:zh_CN/api/gd_cubism_part_opacity.adoc[]
+** xref:zh_CN/api/gd_cubism_user_model.adoc[]
+** xref:zh_CN/api/gd_cubism_value_abs.adoc[]

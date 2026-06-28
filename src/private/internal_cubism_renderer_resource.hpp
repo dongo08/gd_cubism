@@ -41,8 +41,8 @@ public:
 
     SubViewport* request_viewport();
     MeshInstance2D* request_mesh_instance();
-    ShaderMaterial* request_shader_material(const Csm::CubismModel *model, const Csm::csmInt32 index);
-    ShaderMaterial* request_mask_material();
+    Ref<ShaderMaterial> request_shader_material(const Csm::CubismModel *model, const Csm::csmInt32 index);
+    Ref<ShaderMaterial> request_mask_material();
 
     // Shader
     Ref<Shader> get_shader(const GDCubismShader e) const { return this->ary_shader[e]; }

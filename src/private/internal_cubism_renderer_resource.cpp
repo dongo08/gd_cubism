@@ -68,14 +68,14 @@ void InternalCubismRendererResource::clear() {
 }
 
 MeshInstance2D* InternalCubismRendererResource::request_mesh_instance() {
-    ArrayMesh* mesh = memnew(ArrayMesh);
+    Ref<ArrayMesh> mesh; mesh.instantiate();
     MeshInstance2D* node = memnew(MeshInstance2D);
     node->set_mesh(mesh);
     return node;
 }
 
-ShaderMaterial* InternalCubismRendererResource::request_shader_material(const Csm::CubismModel *model, const Csm::csmInt32 index) {
-    ShaderMaterial* mat = memnew(ShaderMaterial);
+Ref<ShaderMaterial> InternalCubismRendererResource::request_shader_material(const Csm::CubismModel *model, const Csm::csmInt32 index) {
+    Ref<ShaderMaterial> mat; mat.instantiate();
     
     GDCubismShader e = GD_CUBISM_SHADER_NORM_MIX;
     if (model->GetDrawableMaskCounts()[index] == 0)
@@ -144,14 +144,14 @@ ShaderMaterial* InternalCubismRendererResource::request_shader_material(const Cs
     return mat;
 }
 
-ShaderMaterial* InternalCubismRendererResource::request_mask_material() {
-    ShaderMaterial* mat = memnew(ShaderMaterial);
+Ref<ShaderMaterial> InternalCubismRendererResource::request_mask_material() {
+    Ref<ShaderMaterial> mat; mat.instantiate();
 
     Ref<Shader> shader = this->_owner_viewport->get_shader(GD_CUBISM_SHADER_MASK);
     if (shader.is_null())
         shader = this->get_shader(GD_CUBISM_SHADER_MASK);
 
     mat->set_shader(shader);
-    
+
     return mat;
 }

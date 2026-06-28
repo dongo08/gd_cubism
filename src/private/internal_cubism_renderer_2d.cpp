@@ -306,7 +306,7 @@ void InternalCubismRenderer2D::build_model(InternalCubismRendererResource &res, 
             this->update_mesh(model, index, res, node->get_mesh());
         }
         
-        ShaderMaterial* mat = res.request_shader_material(model, index);
+        Ref<ShaderMaterial> mat = res.request_shader_material(model, index);
         node->set_material(mat);        
         node->set_name(node_name);
 
@@ -385,7 +385,7 @@ void InternalCubismRenderer2D::build_model(InternalCubismRendererResource &res, 
                     meshes[j] = node->get_mesh();
                     this->update_mesh(model, j, res, node->get_mesh());
                 }
-                ShaderMaterial *mat = res.request_mask_material();
+                Ref<ShaderMaterial> mat = res.request_mask_material();
 
                 node->set_name(mask_name);
                 node->set_material(mat);

@@ -1,0 +1,135 @@
+= GDCubismEffectTargetPoint
+:encoding: utf-8
+:lang: zh_CN
+:author: MizunagiKB <mizukb@live.jp>
+:copyright: 2023 MizunagiKB
+:doctype: book
+:source-highlighter: highlight.js
+:icons: font
+:experimental:
+:stylesdir: ../../res/theme/css
+:stylesheet: mizunagi-works.css
+ifdef::env-github,env-vscode[]
+:adocsuffix: .adoc
+endif::env-github,env-vscode[]
+ifndef::env-github,env-vscode[]
+:adocsuffix: .html
+endif::env-github,env-vscode[]
+
+
+== 描述
+
+作为 xref:zh_CN/api/gd_cubism_user_model.adoc[] 的子元素配置后，可以让模型朝指定坐标方向转头或视线。
+
+NOTE: 使用此元素需要事先在 Live2D 模型中设置好相关参数。
+
+如果希望用鼠标指针在画面内拖动来控制视线移动，请使用以下代码更新 _GDCubismEffectTargetPoint_ 的当前位置。
+
+[source, gdscript, numlines]
+----
+func _input(event):
+    if event as InputEventMouseButton:
+        pressed = event.is_pressed()
+
+    if event as InputEventMouseMotion:
+        if pressed == true:
+            var calc_pos: Vector2 = $GDCubismUserModel.to_local(event.position) * Vector2(1, -1)
+            $GDCubismUserModel/GDCubismEffectTargetPoint.set_target(calc_pos.normalized())
+        else:
+            $GDCubismUserModel/GDCubismEffectTargetPoint.set_target(Vector2.ZERO)
+----
+
+
+== 属性
+
+[cols="3",frame=none,grid=none]
+|===
+>|String <|<<id-property-body_angle_x,body_angle_x>> |[默认值: "ParamBodyAngleX"]
+>|float <|<<id-property-body_range,body_range>> |[默认值: 10.0]
+
+>|String <|<<id-property-eyes_ball_x,eyes_ball_x>> |[默认值: "ParamEyeBallX"]
+>|String <|<<id-property-eyes_ball_y,eyes_ball_y>> |[默认值: "ParamEyeBallX"]
+>|float <|<<id-property-eyes_range,eyes_range>> |[默认值: 1.0]
+
+>|String <|<<id-property-head_angle_x,head_angle_x>> |[默认值: "ParamAngleX"]
+>|String <|<<id-property-head_angle_y,head_angle_y>> |[默认值: "ParamAngleY"]
+>|String <|<<id-property-head_angle_z,head_angle_z>> |[默认值: "ParamAngleZ"]
+>|float <|<<id-property-head_range,head_range>> |[默认值: 30.0]
+|===
+
+
+== 方法
+
+[cols="2",frame=none,grid=none]
+|===
+>|Vector2 <|get_target()
+>|void <|set_target(target: Vector2)
+|===
+
+
+== 信号
+== 枚举
+== 常量
+== 属性说明
+
+[[id-property-body_angle_x]]
+String body_angle_x [默认值: "ParamBodyAngleX"]::
+指定通过 set_target 变更身体朝向时使用的 _ID_。
+
+[[id-property-body_range]]
+String body_range [默认值: 10.0]::
+指定 _body_angle_x_ 中设定的 _ID_ 的移动幅度。 +
+值越大反应越敏感，指定 0.0 时不响应。
+
+
+[[id-property-eyes_ball_x]]
+String eyes_ball_x [默认值: "ParamEyeBallX"]::
+指定通过 set_target 变更视线（眼球方向）时使用的 _ID_。
+
+[[id-property-eyes_ball_y]]
+String eyes_ball_y [默认值: "ParamEyeBallX"]::
+指定通过 set_target 变更视线（眼球方向）时使用的 _ID_。
+
+[[id-property-eyes_range]]
+String eyes_range [默认值: 1.0]::
+指定 _eyes_ball_x_、_eyes_ball_y_ 中设定的 _ID_ 的移动幅度。 +
+值越大反应越敏感，指定 0.0 时不响应。
+
+
+[[id-property-head_angle_x]]
+String head_angle_x [默认值: "ParamHeadAngleX"]::
+指定通过 set_target 变更头部方向时使用的 _ID_。
+
+[[id-property-head_angle_y]]
+String head_angle_y [默认值: "ParamHeadAngleY"]::
+指定通过 set_target 变更头部方向时使用的 _ID_。
+
+[[id-property-head_angle_z]]
+String head_angle_z [默认值: "ParamHeadAngleZ"]::
+指定通过 set_target 变更头部方向时使用的 _ID_。
+
+[[id-property-head_range]]
+String head_range [默认值: 3.0]::
+指定 _head_angle_x_、_head_angle_y_、_head_angle_z_ 中设定的 _ID_ 的移动幅度。 +
+值越大反应越敏感，指定 0.0 时不响应。
+
+
+== 方法说明
+
+[[id-method-get_target]]
+Vector2 get_target()::
+获取 Live2D 模型当前的朝向。
+
+[[id-method-set_target]]
+void set_target(target: Vector2)::
+设置 Live2D 模型的朝向。 +
+可设置的方向 x、y 范围均为 -1.0 到 1.0。 +
+超出范围的值会被限制在范围内。 +
++
+指定的坐标不是屏幕坐标，而是基于贴图纹理的 Node 中心的相对范围。 +
+
+* x: 0.0, y: 0.0 正面
+* x: -1.0, y: 0.0 画面左侧
+* x: 1.0, y: 0.0 画面右侧
+* x: 0.0, y: -1.0 画面下方
+* x: 0.0, y: 1.0 画面上方

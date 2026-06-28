@@ -1,0 +1,175 @@
+= 自定义动画
+:encoding: utf-8
+:lang: zh_CN
+:author: MizunagiKB <mizukb@live.jp>
+:copyright: 2024 MizunagiKB
+:doctype: book
+:source-highlighter: highlight.js
+:icons: font
+:experimental:
+:stylesdir: ./docs/res/theme/css
+:stylesheet: mizunagi-works.css
+ifdef::env-github,env-vscode[]
+:adocsuffix: .adoc
+endif::env-github,env-vscode[]
+ifndef::env-github,env-vscode[]
+:adocsuffix: .html
+endif::env-github,env-vscode[]
+
+
+xref:ja/custom/animation.adoc[日文] / xref:en/custom/animation.adoc[英文] / xref:zh_CN/custom/animation.adoc[中文]
+
+
+[NOTE]
+====
+此文档正在编写中。
+====
+
+
+== 前言
+
+GDCubism 是为在 Godot Engine 上轻松播放 Live2D 模型而开发的。
+
+由于通过 SubViewport 进行绘制，在模型显示方面需要一些准备，但一旦显示出来，就可以方便地在 Godot Editor 上直接确认。
+
+虽然显示很简单，但在需要更精细控制时，如何操作可能不太直观。例如，在播放动作的同时只更改部分参数的情况。
+
+这类操作可以通过 GDScript 实现，但目前只能通过阅读源代码来了解具体方法。
+
+因此，作为参考资料，编写了本文档。
+
+
+=== 处理流程
+
+在 GDScript 中控制 Live2D 模型时，需要控制通过 GDCubismUserModel 的 get_parameter 函数获取的数组。但如果随意设置，将无法正确反映到 Live2D 模型上。
+
+原因在于即使试图覆盖参数，已设置的动作也会将其覆盖。
+
+要正确设置，最好先了解 GDCubism 如何进行绘制。因此首先说明 GDCubism 如何绘制 Live2D 模型。（对技术背景不感兴趣的话可以略过）
+
+
+==== 处理说明
+
+GDCubismUserModel 每帧执行以下处理。大致顺序是"读取设置值"→"更新 Live2D 信息"→"绘制"。
+
+. 读取设置值
+.. 更新动作参数。
+.. 更新表情参数。
+.. 反映 GDCubismUserModel 的 parameters。
+.. 反映 GDCubismUserModel 的 opacities。
+. 更新 Live2D 信息
+.. 更新物理参数。
+.. 更新姿态。
+.. 更新绘制信息。
+. 绘制信息创建
+.. 计算绘制所需的 SubViewport 和 Mesh 数量。
+.. 生成 SubViewport 和 ArrayMesh，并分配到节点树。
+
+> 实际的程序代码（0.6 版时）以 _process 作为触发器，按以下方式调用。
+
+NOTE: _process 是在 playback_process_mode 设置为 IDLE 时的情况。PHYSICS 时是 _physics_process，MANUAL 时是 _advance。
+
+
+* _GDCubismUserModel_._process
+** _GDCubismUserModel_._update
+
+*** _InternalCubismModel_.pro_update
+**** _InternalCubismModel_.effect_batch
+***** *cubism_prologue* 信号的调用
+**** 恢复 Live2D 模型的参数信息
+**** _motionManager.UpdateMotion
+**** 保存 Live2D 模型的参数信息
+**** _expressionManager.UpdateMotion
+**** _InternalCubismModel_.GetModelOpacity
+
+*** _InternalCubismModel_.efx_update
+**** 如果 GDCubismEffect* 节点有变更，则调用 efx_term, efx_init 信号
+**** _InternalCubismModel_.effect_batch
+***** *cubism_process* 信号的调用
+
+*** 参数信息的设置与获取
+*** 透明度的设置与获取
+
+*** _InternalCubismModel_.epi_update
+**** 更新 Live2D 模型的物理参数
+**** 更新 Live2D 模型的姿态
+**** 更新 Live2D 模型的内部状态
+**** _InternalCubismModel_.effect_batch
+***** *cubism_epilogue* 信号的调用
+
+*** _InternalCubismModel_.update_node
+**** _InternalCubismModel_.GetRenderer
+**** 反映绘制尺寸
+**** 反映绘制位置
+**** 确保绘制所需的资源
+**** 将绘制所需的信息设置到 GodotEngine
+
+
+==== 添加自定义处理的方法
+
+以下将描述实际的实现方法。
+
+
+===== 在 _process 函数中处理的方法
+
+前述一系列处理全部在 Godot Engine 调用 GDCubismUserModel 的 _process 时进行。
+
+因此，如果只想稍微修改 Live2D 模型的参数，在这之后进行即可。需要注意 Godot Engine 端调用 GDCubismUserModel 内 _process 的时机。
+
+这取决于 GDCubismUserModel 在节点树中的位置以及脚本设置的位置。要确保反映生效，请将 GDCubismUserModel 的 playback_process_mode 设置为 MANUAL，调用 advance 函数后再操作参数。
+
+这样可以防止参数更新在反映前被覆盖。
+
+[source]
+[source,,numlines]
+----
+include::example$custom_animation_process.gd[]
+----
+
+
+===== 使用 GDCubismEffectCustom 处理的方法
+
+将 GDCubismEffectCustom 添加到 GDCubismUserModel 的子元素后，就可以接收 cubism_prologue、cubism_process、cubism_epilogue 信号。
+
+GDCubismEffectCustom 可以接收 5 种信号，其中与 Live2D 模型相关的是以下 3 种。
+
+cubism_prologue::
+在 Live2D 模型中应用的动作和表情更新前调用。在接收此信号时修改参数将被忽略。 +
+目前可以操作通过 GDCubismUserModel 的 get_parameters 函数获取的参数，但未来版本中行为可能会改变。
+
+cubism_process::
+在 Live2D 模型中应用的动作和表情更新后调用。在此信号接收时机更新参数，可以在播放动作的同时覆盖任意处理。
+
+例如，替换手型、取下帽子、闭上眼睛等处理。
+
+
+cubism_epilogue::
+与 cubism_process 几乎相同，但 GDCubismUserModel 的 get_parameters 的内容已经是反映了动作和表情的状态。
+
+[source]
+[source,,numlines]
+----
+include::example$custom_animation_signal.gd[]
+----
+
+
+== 示例代码
+
+以下提供了使用 GDCubismEffectCustom 的示例。
+
+
+[cols="1,1",frame=none,grid=none]
+|===
+^|名称 ^|说明
+
+|demo_effect_custom_01.tscn
+|使用 _GDCubismEffectCustom_ 的示例。
+
+|demo_effect_custom_02.tscn
+|使用 _GDCubismEffectCustom_ 的示例。
+
+|demo_effect_custom_03.tscn
+|使用 _GDCubismEffectCustom_ 的示例。
+进行简易的音频同步口型（根据音量控制嘴部动作）。
+
+|===

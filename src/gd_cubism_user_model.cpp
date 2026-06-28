@@ -581,6 +581,7 @@ bool GDCubismUserModel::_set(const StringName &p_name, const Variant &p_value) {
 
         if(p_name == name) {
             model->SetParameterValue(index, p_value);
+            model->SaveParameters();
             return true;
         }
     }

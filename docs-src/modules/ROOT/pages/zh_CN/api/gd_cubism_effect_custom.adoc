@@ -1,0 +1,54 @@
+= GDCubismEffectCustom
+:encoding: utf-8
+:lang: zh_CN
+:author: MizunagiKB <mizukb@live.jp>
+:copyright: 2023 MizunagiKB
+:doctype: book
+:source-highlighter: highlight.js
+:icons: font
+:experimental:
+:stylesdir: ../../res/theme/css
+:stylesheet: mizunagi-works.css
+ifdef::env-github,env-vscode[]
+:adocsuffix: .adoc
+endif::env-github,env-vscode[]
+ifndef::env-github,env-vscode[]
+:adocsuffix: .html
+endif::env-github,env-vscode[]
+
+
+== 描述
+
+作为 xref:zh_CN/api/gd_cubism_user_model.adoc[] 的子元素配置后，可以扩展自定义功能。
+
+
+== 属性
+== 方法
+== 信号
+
+cubism_epilogue(model: GDCubismUserModel, delta: float)::
+在 Live2D 模型绘制时调用。
+
+cubism_init(model: GDCubismUserModel)::
+在开始使用 Live2D 模型时调用。 +
+通常只调用一次，但在以下条件下可能再次触发信号。
+* Live2D 模型重新加载时。
+* Live2D 模型的子元素中 _GDCubismEffect*_ 被添加或删除时。
+
+cubism_process(model: GDCubismUserModel, delta: float)::
+在 Live2D 模型绘制时调用。
+
+cubism_prologue(model: GDCubismUserModel, delta: float)::
+在 Live2D 模型绘制时调用。
+
+cubism_term(model: GDCubismUserModel)::
+在结束使用 Live2D 模型时调用。
+通常只调用一次，但在以下条件下可能再次触发信号。
+* Live2D 模型重新加载时。
+* Live2D 模型的子元素中 _GDCubismEffect*_ 被添加或删除时。
+
+
+== 枚举
+== 常量
+== 属性说明
+== 方法说明

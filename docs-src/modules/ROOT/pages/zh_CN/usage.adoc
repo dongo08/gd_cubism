@@ -1,0 +1,250 @@
+= 使用说明
+:encoding: utf-8
+:lang: zh_CN
+:author: MizunagiKB <mizukb@live.jp>
+:copyright: 2023 MizunagiKB
+:doctype: book
+:source-highlighter: highlight.js
+:icons: font
+:experimental:
+:stylesdir: ./res/theme/css
+:stylesheet: mizunagi-works.css
+ifdef::env-github,env-vscode[]
+:adocsuffix: .adoc
+endif::env-github,env-vscode[]
+ifndef::env-github,env-vscode[]
+:adocsuffix: .html
+endif::env-github,env-vscode[]
+
+
+xref:ja/usage.adoc[日文] / xref:en/usage.adoc[英文] / xref:zh_CN/usage.adoc[中文]
+
+
+== 使用方法
+
+如果想立即体验，请在 Godot Engine 编辑器中打开 _demo_ 文件夹中的 _project.godot_。（演示的运行方法见本文档下方）
+
+在自定义项目中使用时，请将 _demo_ 文件夹中 _addons_ 文件夹下的内容复制到目标项目中。
+
+如果项目中已有 _addons_ 文件夹，请复制 _gd_cubism_ 文件夹下的内容。
+
+NOTE: _addons_ 文件夹是为存放像 GDCubism 这样扩展 Godot Engine 的程序而准备的文件夹。
+
+
+=== 简单使用方法（在 Editor 中使用）
+
+以下说明如何加载 Live2D 模型并通过 _Sprite2D_ 进行显示。
+
+[CAUTION]
+====
+此说明基于 0.8 版本。从 0.9 开始改为直接渲染，不再需要用于显示渲染结果的纹理。新的说明正在编写中。
+====
+
+==== 节点配置
+
+请参考以下图示配置节点。
+
+image::usage_simple_01.png[fig01,256]
+
+
+==== 加载 Live2D 模型
+
+从节点列表中选择 _GDCubismUserModel_，点击 Assets 项右侧的文件选择按钮。 +
+将显示文件选择对话框，从中选择任意的 *.model3.json 文件。
+
+image::usage_simple_02.png[fig02,256]
+
+
+==== 确认预览画面中显示了 Live2D 模型
+
+Live2D 模型正确加载后，预览画面中将显示 Live2D 模型。
+
+image::usage_simple_03.png[fig03,256]
+
+
+==== 在精灵中显示 Live2D 模型
+
+接下来选择 _Sprite2D_ 节点，打开 Texture 项。 +
+从列表中选择 ```New ViewportTexture```，将显示选择 _Viewport_ 的对话框，选择 _GDCubismUserModel_。
+
+image::usage_simple_04.png[fig04,256]
+
+Texture 栏中将显示 Live2D 模型。
+
+image::usage_simple_05.png[fig05,256]
+
+_Sprite2D_ 的位置也将显示 Live2D 模型。
+
+image::usage_simple_06.png[fig06,512]
+
+
+=== 故障排除
+
+==== 模型无法正常加载
+
+如果模型的文件名包含日文或其他非 ASCII 字符，可能无法正常加载。请将 Cubism Editor 输出的文件名及 *.model3.json 内的引用改为英文，即可正常工作。
+
+==== 眨眼不正常
+
+可能是在 *.model3.json 中没有指定 EyeBlink 的 Ids。请设置后重新导出，或在 Ids 中添加 ParamEyeLOpen 和 ParamEyeROpen。
+
+==== 显示图像模糊
+
+从 0.5 版本开始，着色器中启用了 Mipmap。
+
+要启用此功能，请在 Live2D 使用的纹理中启用 Mipmap 并重新导入。
+
+image::usage_mipmap_01.png[mipmap01,256]
+
+Mipmap 的效果相当明显，但根据图像的不同可能会出现模糊感。
+
+Mipmap 未启用
+
+image::usage_mipmap_02a.jpg[mipmap02a,256]
+
+Mipmap 已启用
+
+image::usage_mipmap_02b.jpg[mipmap02b,256]
+
+==== 导出项目后 Live2D 模型不显示
+
+Live2D 模型使用了多种文件，这些文件由 Live2D 内部加载。因此，Godot Engine 无法很好地将 Live2D 相关资源打包。
+
+要正确打包，必须在 Export 画面的 Resources 栏中直接指定您使用的资源或包含资源的文件夹。
+
+关于指定方法的详细说明，请参阅官方文档 Exporting projects 中的 Resource options 部分。
+
+https://docs.godotengine.org/en/4.x/tutorials/export/exporting_projects.html#resource-options
+
+
+== 关于演示
+
+_demo_ 文件夹中包含以下示例。所有示例的运行都需要 Live2D 模型"虹色まお"。
+
+该 Live2D 模型可以从 link:https://www.live2d.com[] 下载。
+
+请将下载的文件按以下结构配置。
+
+* (_demo/addons/gd_cubism/example/res/live2d_)
+** mao_pro_jp
+*** runtime
+**** expressions
+***** ...
+**** map_pro_t02.4096
+***** ...
+**** motions
+***** ...
+**** mao_pro.cdi3.json
+**** mao_pro.moc3
+**** mao_pro.model3.json
+**** mao_pro.physics3.json
+**** mao_pro.pose3.json
+*** mao_pro_t05.can3
+*** mao_pro_t05.cmo3
+
+如果想用自己的模型尝试，请参考以上结构，将输出的内容放置在 _demo/addons/gd_cubism/example/res/live2d_ 下。
+
+
+=== 相关文档
+
+* xref:zh_CN/custom/motion.adoc[]
+
+
+=== 演示说明
+
+[cols="1,1",frame=none,grid=none]
+|===
+^|名称 ^|说明
+
+|demo_effect_custom_01.tscn
+|使用 _GDCubismEffectCustom_ 的示例。
+
+|demo_effect_custom_02.tscn
+|使用 _GDCubismEffectCustom_ 的示例。
+
+|demo_effect_custom_03.tscn
+|使用 _GDCubismEffectCustom_ 的示例。
+进行简易的音频同步口型（根据音量控制嘴部动作）。
+
+|demo_effect_hit_area.tscn
+|使用 _GDCubismEffectHitArea_ 的示例。
+也是 Live2D 模型中设置的 _HitArea_ 的使用示例。
+
+|demo_effect_target_point.tscn
+|使用 _GDCubismEffectTargetPoint_ 的示例。
+根据鼠标位置使 Live2D 模型追踪视线。
+
+|demo_fade.tscn
+|为了模拟 0.9 版之前的渲染方式，使用 _SubViewport_ 的示例。
+
+|demo_simple.tscn
+|仅通过节点组合显示 Live2D 模型的示例。
+
+|demo_transparent.tscn
+|使 Live2D 模型周围透明、仅显示角色的示例。
+
+|viewer.tscn
+|兼顾简易查看器的示例。
+可以播放 _Expression_ 和 _Motion_。
+
+|===
+
+NOTE: 程序提供了 GDScript 版和 C# 版。可以通过替换 tscn 文件中分配的脚本来验证运行。
+
+
+== API 参考 / C# 支持状态
+
+GDCubism 提供了多种类。使用方法请参考以下链接的文档。
+
+[cols="^1,^1,^1",frame=none,grid=none]
+|===
+|GDScript 类 |C# 类 |功能
+
+|link:./api/gd_cubism_effect{adocsuffix}[GDCubismEffect]
+|GDCubismEffectCS
+|-
+
+|link:./api/gd_cubism_effect_breath{adocsuffix}[GDCubismEffectBreath]
+|GDCubismEffectBreathCS
+|△
+
+|link:./api/gd_cubism_effect_custom{adocsuffix}[GDCubismEffectCustom]
+|GDCubismEffectCustomCS
+|○
+
+|link:./api/gd_cubism_effect_eye_blink{adocsuffix}[GDCubismEffectEyeBlink]
+|GDCubismEffectEyeBlinkCS
+|△
+
+|link:./api/gd_cubism_effect_hit_area{adocsuffix}[GDCubismEffectHitArea]
+|GDCubismEffectHitAreaCS
+|○
+
+|link:./api/gd_cubism_effect_target_point{adocsuffix}[GDCubismEffectTargetPoint]
+|GDCubismEffectTargetPointCS
+|○
+
+|link:./api/gd_cubism_motion_entry{adocsuffix}[GDCubismMotionEntry]
+|GDCubismMotionEntryCS
+|x
+
+|link:./api/gd_cubism_motion_queue_entry_handle{adocsuffix}[GDCubismMotionQueueEntryHandle]
+|GDCubismMotionQueueEntryHandleCS
+|x
+
+|link:./api/gd_cubism_value_abs{adocsuffix}[GDCubismValueAbs]
+|GDCubismValueAbsCS
+|-
+
+|link:./api/gd_cubism_parameter{adocsuffix}[GDCubismParameter]
+|GDCubismParameterCS
+|○
+
+|xref:ja/api/gd_cubism_part_opacity.adoc[]
+|GDCubismPartOpacityCS
+|○
+
+|xref:ja/api/gd_cubism_user_model.adoc[]
+|GDCubismUserModelCS
+|○
+|===

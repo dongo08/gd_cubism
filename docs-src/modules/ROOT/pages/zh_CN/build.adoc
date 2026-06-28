@@ -1,0 +1,391 @@
+= 构建
+:encoding: utf-8
+:lang: zh_CN
+:author: MizunagiKB <mizukb@live.jp>
+:copyright: 2023 MizunagiKB
+:doctype: book
+:source-highlighter: highlight.js
+:icons: font
+:experimental:
+:stylesdir: ./res/theme/css
+:stylesheet: mizunagi-works.css
+ifdef::env-github,env-vscode[]
+:adocsuffix: .adoc
+endif::env-github,env-vscode[]
+ifndef::env-github,env-vscode[]
+:adocsuffix: .html
+endif::env-github,env-vscode[]
+
+
+xref:ja/build.adoc[日文] / xref:en/build.adoc[英文] / xref:zh_CN/build.adoc[中文]
+
+
+== 构建方法
+=== 获取源代码与准备
+
+首先克隆 gd_cubism 仓库。
+
+最新的版本可直接使用。如果想尝试功能扩展或 bug 修复的版本，请根据需要切换分支。
+
+[source, bash]
+----
+git clone https://github.com/MizunagiKB/gd_cubism.git
+cd gd_cubism
+git submodule update --init
+----
+
+
+==== 获取并配置 CubismSdkForNative
+
+接下来从 Live2D 官方网站获取构建所需的 SDK。
+
+* Live2D 官方网站 - https://www.live2d.com/
+
+Cubism SDK for Native 中除 Cubism SDK 外还包含 Cubism Native Framework。
+
+请将下载的文件按以下目录结构解压。（将下载的文件放到 thirdparty 文件夹中解压即可）
+
+[source]
+----
+./thirdparty
+└── CubismSdkForNative-5-r.1
+     ├── CHANGELOG.md
+     ├── Core
+     │   ├── CHANGELOG.md
+     │   ├── LICENSE.md
+     │   ├── README.ja.md
+     │   ├── README.md
+     │   ├── RedistributableFiles.txt
+     │   ├── dll
+     │   ├── include
+     │   └── lib
+     ├── Framework
+     │   ├── CHANGELOG.md
+     │   ├── CMakeLists.txt
+     │   ├── LICENSE.md
+     │   ├── README.ja.md
+     │   ├── README.md
+     │   ├── TRANSLATION.md
+     │   └── src
+     ├── LICENSE.md
+     ├── NOTICE.ja.md
+     ├── NOTICE.md
+     ├── README.ja.md
+     ├── README.md
+     ├── Samples
+     │   ├── Cocos2d-x
+     │   ├── D3D11
+     │   ├── D3D9
+     │   ├── Metal
+     │   ├── OpenGL
+     │   ├── Resources
+     │   └── Vulkan
+     ├── cubism-info.yml
+     ├── logor.png
+     └── logos.png
+----
+
+
+==== 关于缺陷处理
+
+根据 Godot Engine 的版本和环境，在窗口非显示状态下可能会发生内存泄漏的问题。
+
+此问题在使用 Vulkan 渲染器的 _Forward+_ 和 _mobile_ 中出现，部分问题已得到解决，但在 macOS 环境下尚未解决。
+
+为解决此问题，可在执行 scons 时指定 *COUNTERMEASURES_90017_90030* 参数。
+
+COUNTERMEASURES_90017_90030=1 (默认):: 窗口非显示状态下不调用 Live2D 模型的绘制处理。
+COUNTERMEASURES_90017_90030=0:: 不论窗口的显示状态如何，始终调用 Live2D 模型的绘制处理。
+
+
+请参阅以下 Issue 了解问题详情。
+
+* https://github.com/godotengine/godot/issues/89651
+* https://github.com/godotengine/godot/issues/90017
+* https://github.com/godotengine/godot/issues/90030
+
+
+==== 与 CubismEditor 的行为差异
+
+GDCubism 内部使用的 CubismNativeFramework 虽然能够播放 Cubism Editor 创建的 Live2D 模型，但在绘制优先级和动作方面可能存在差异。
+
+Cubism SDK for Native 的文档中记载了与 Cubism Editor 的行为差异及数据制作的提示。
+
+文档内容主要针对 Unity 或 Cubism SDK for Native，部分内容可能无法直接使用，但可作为参考。
+
+.Cubism Editor 5
+* link:https://docs.live2d.com/cubism-sdk-manual/cubism-5-new-functions/[Cubism 5 新功能的SDK支持]
+* link:https://docs.live2d.com/cubism-sdk-manual/cubism-4-new-functions/[Cubism 4 新功能的SDK支持]
+* link:https://docs.live2d.com/cubism-sdk-manual/cubism-4-2-new-functions/[Cubism 4.2 新功能的SDK支持]
+* link:https://docs.live2d.com/cubism-sdk-manual/compatibility-with-cubism-5/[Cubism 5 功能的SDK兼容性]
+* link:https://docs.live2d.com/cubism-sdk-manual/compatibility-with-cubism-4-2/[Cubism 4.2 功能的SDK兼容性]
+* link:https://docs.live2d.com/cubism-sdk-manual/update-sdk-to-cubism5/[将旧版本项目迁移到Cubism 5 SDK]
+* link:https://docs.live2d.com/cubism-sdk-manual/update-sdk-to-cubism4/[将旧版本项目迁移到Cubism 4 SDK]
+
+.Cubism Editor 5 / 平台比较
+* link:https://docs.live2d.com/cubism-sdk-manual/sdk-type-for-motiopn/[工作流中动作创建的区别]
+
+
+==== 自定义 CubismNativeFramework
+
+GDCubism 使用 CubismSdkForNative 中附带的 CubismNativeFramework。如果希望使用最新版 Framework 或进行自定义扩展，可通过以下方法进行更改。
+
+[source, bash]
+----
+pushd thirdparty
+git clone https://github.com/Live2D/CubismNativeFramework.git
+popd
+----
+
+CAUTION: 构建时，自定义构建的 Framework 优先于 CubismSdkForNative 中的 Framework。
+如果不再需要，请将其删除。
+
+
+=== Windows 版构建
+
+[NOTE]
+====
+构建需要以下条件：
+
+* link:https://visualstudio.microsoft.com/zh-hans/vs/community/[Visual Studio Community]，2019 或更高版本。
+* link:https://www.python.org/downloads/windows/[Python 3.8+]
+* link:https://scons.org/pages/download.html[SCons 3.0+] 构建系统。
+====
+
+[CAUTION]
+====
+有报告称使用 SCons 4.8 时无法正常生成 VS Project，导致构建失败。此问题由 Godot Engine 引起，预计将在未来版本中解决，目前请使用 SCons 4.7。
+https://github.com/godotengine/godot/pull/94117
+
+[source]
+----
+# 安装 scons 时指定版本即可解决。
+# 即使已安装 4.8 以上版本，也可通过此方法切换到 4.7。
+pip install scons==4.7
+----
+====
+
+
+.Visual Studio 安装注意事项
+****
+安装 Visual Studio 时，必须从工作负载列表中选择 C{plus}{plus} 并启用。
+
+如果错误地在没有 C{plus}{plus} 支持的情况下安装了 Visual Studio，请再次运行安装程序。应该会显示"修改 (Modify)"按钮。从"添加或删除程序"启动安装程序只会显示修复选项，无法安装 C{plus}{plus} 工具。
+
+link:https://docs.godotengine.org/en/stable/contributing/development/compiling/compiling_for_windows.html#development-in-visual-studio[Godot Engine 4.1 文档]
+****
+
+
+环境准备好后，请按照以下步骤进行构建。
+
+[source, console]
+--
+scons platform=windows arch=x86_64 target=template_debug
+scons platform=windows arch=x86_64 target=template_release
+--
+
+构建完成后，以下文件将生成在 _demo/addons/gd_cubism/bin_ 目录下。
+
+* libgd_cubism.windows.debug.x86_64.dll
+* libgd_cubism.windows.release.x86_64.dll
+
+
+=== macOS 版构建
+
+构建需要以下条件：
+
+[NOTE]
+====
+* link:https://apps.apple.com/us/app/xcode/id497799835[Xcode]
+* link:https://www.python.org/downloads/[Python 3.8+]
+* link:https://scons.org/pages/download.html[SCons 3.0+] 构建系统。
+====
+
+[CAUTION]
+====
+有报告称使用 SCons 4.8 时构建会失败。此问题由 Godot Engine 引起，预计将在未来版本中解决，目前请使用 SCons 4.7。
+https://github.com/godotengine/godot/pull/94117
+
+[source]
+----
+# 安装 scons 时指定版本即可解决。
+# 即使已安装 4.8 以上版本，也可通过此方法切换到 4.7。
+pip install scons==4.7
+----
+====
+
+
+准备好后请按照以下步骤进行构建。
+
+[source, bash]
+--
+# 适用于 x86_64 (Intel Mac)
+scons platform=macos arch=x86_64 target=template_debug
+scons platform=macos arch=x86_64 target=template_release
+# 适用于 arm64 (Apple Silicon Mac)
+scons platform=macos arch=arm64 target=template_debug
+scons platform=macos arch=arm64 target=template_release
+--
+
+构建完成后，以下文件将生成在 _demo/addons/gd_cubism/bin_ 目录下。
+
+* libgd_cubism.macos.debug.framework
+* libgd_cubism.macos.release.framework
+
+
+==== 构建 universal 二进制文件
+
+如果要构建 universal 二进制文件，请在执行 scons 前按以下方式生成链接文件。
+
+[source, bash]
+----
+pushd thirdparty/CubismSdkForNative-5-r.1/Core/lib/macos
+mkdir universal
+lipo -create arm64/libLive2DCubismCore.a x86_64/libLive2DCubismCore.a -output universal/libLive2DCubismCore.a
+popd
+
+# 适用于 universal
+scons platform=macos arch=universal target=template_debug
+scons platform=macos arch=universal target=template_release
+----
+
+
+=== Linux 版构建
+
+[NOTE]
+====
+构建需要以下条件：
+
+* GCC 7+, Clang 6+。
+* link:https://www.python.org/downloads/[Python 3.8+]。
+* link:https://scons.org/pages/download.html[SCons 3.0+] 构建系统。
+
+在 Linux 环境下，不同的发行版可能需要额外安装不同的软件包。请参考 Godot Engine 的文档了解各发行版所需的条件。
+
+* link:https://docs.godotengine.org/en/stable/contributing/development/compiling/compiling_for_linuxbsd.html[Compiling for Linux, *BSD]
+====
+
+
+环境准备好后，请按照以下步骤进行构建。
+
+[source, bash]
+--
+scons platform=linux arch=x86_64 target=template_debug
+scons platform=linux arch=x86_64 target=template_release
+--
+
+构建完成后，以下文件将生成在 _demo/addons/gd_cubism/bin_ 目录下。
+
+* libgd_cubism.linux.debug.x86_64.so
+* libgd_cubism.linux.release.x86_64.so
+
+
+=== 其他平台构建
+
+以下两个平台仅确认了可以构建，尚未进行运行验证。
+
+在各自环境中运行时请作为参考。
+
+
+==== iOS 版构建
+
+构建需要以下条件：
+
+[NOTE]
+====
+* link:https://apps.apple.com/us/app/xcode/id497799835[Xcode]
+* link:https://www.python.org/downloads/[Python 3.8+]
+* link:https://scons.org/pages/download.html[SCons 3.0+] 构建系统。
+====
+
+如果 Xcode 仅使用命令行模式，可能无法启动 iphoneos 的构建。
+
+在这种情况下，可以重新指定 Xcode 的路径来解决。
+
+[source, bash]
+----
+sudo xcode-select --switch /Applications/Xcode.app
+----
+
+准备好后请按照以下步骤进行构建。
+
+[source, bash]
+--
+# 适用于 arm64
+scons platform=ios arch=arm64 target=template_debug
+scons platform=ios arch=arm64 target=template_release
+# 适用于 universal
+scons platform=ios arch=universal target=template_debug
+scons platform=ios arch=universal target=template_release
+--
+
+构建完成后，以下文件将生成在 _demo/addons/gd_cubism/bin_ 目录下。
+
+* libgd_cubism.ios.debug.arm64.dylib
+* libgd_cubism.ios.release.arm64.dylib
+* libgd_cubism.ios.debug.universal.dylib
+* libgd_cubism.ios.release.universal.dylib
+
+
+==== Android 版构建
+
+[NOTE]
+====
+构建需要以下条件：
+
+* link:https://www.python.org/downloads/[Python 3.8+]。
+* link:https://scons.org/pages/download.html[SCons 3.0+] 构建系统。
+* link:https://developer.android.com/studio[Android Studio]
+* link:https://www.azul.com/downloads/?package=jdk#zulu[Azul Zulu: 21.28.85]
+====
+
+这里以在 Windows 10 环境下已安装 Android Studio 为前提进行说明。
+
+启动 Android Studio，再启动 SDK Manager。SDK Manager 可以从 Android Studio 启动时显示 "Welcome to Android Studio" 画面的 More Actions 中选择。
+
+SDK Manager 启动后，勾选以下项目进行下载。
+
+* SDK Platforms
+** Android API 34
+** Android 10("Q")
+* SDK Tools
+** Android SDK Build-Tools 34
+** NDK (Side by side)
+** Android SDK Command-line Tools (latest)
+** CMake
+** Android Emulator
+** Android SDK Platform-Tools
+** Android SDK Tools (Obsolete)
+
+环境准备好后，请按照以下步骤进行构建。
+
+[source, bash]
+--
+scons platform=android target=template_debug arch=armv7
+scons platform=android target=template_release arch=armv7
+scons platform=android target=template_debug arch=arm64v8
+scons platform=android target=template_release arch=arm64v8
+--
+
+如果构建未启动，请尝试设置以下环境变量。
+
+* ANDROID_SDK_ROOT ... SDK Manager 中已选项目的安装位置
+* ANDROID_HOME ... SDK Manager 中已选项目的安装位置
+* ANDROID_NDK_HOME ... SDK Manager 中安装的 NDK 的位置
+* ANDROID_NDK_ROOT ... SDK Manager 中安装的 NDK 的位置
+
+.示例
+[source, bash]
+--
+set ANDROID_SDK_ROOT=D:\Android\sdk
+set ANDROID_HOME=D:\Android\sdk
+set ANDROID_NDK_HOME=%ANDROID_SDK_ROOT%\ndk\26.0.10792818
+set ANDROID_NDK_ROOT=%ANDROID_SDK_ROOT%\ndk\26.0.10792818
+--
+
+构建完成后，以下文件将生成在 _demo/addons/gd_cubism/bin_ 目录下。
+
+* libgd_cubism.android.debug.arm32.so
+* libgd_cubism.android.release.arm32.so
+* libgd_cubism.android.debug.arm64.so
+* libgd_cubism.android.release.arm64.so

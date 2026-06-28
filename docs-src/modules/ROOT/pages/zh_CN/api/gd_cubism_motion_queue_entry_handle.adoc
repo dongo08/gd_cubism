@@ -1,0 +1,45 @@
+= GDCubismMotionQueueEntryHandle
+:encoding: utf-8
+:lang: zh_CN
+:author: MizunagiKB <mizukb@live.jp>
+:copyright: 2023 MizunagiKB
+:doctype: book
+:source-highlighter: highlight.js
+:icons: font
+:experimental:
+:stylesdir: ../../res/theme/css
+:stylesheet: mizunagi-works.css
+ifdef::env-github,env-vscode[]
+:adocsuffix: .adoc
+endif::env-github,env-vscode[]
+ifndef::env-github,env-vscode[]
+:adocsuffix: .html
+endif::env-github,env-vscode[]
+
+
+== 描述
+
+xref:zh_CN/api/gd_cubism_user_model.adoc[] 的 _start_motion_ 函数、_start_random_motion_ 函数的返回值。
+
+
+== 属性
+
+[cols="3",frame=none,grid=none]
+|===
+>|HandleError <|error |[默认值: "FAILED"]
+|===
+
+
+== 枚举
+
+enum HandleError::
+* OK = 0 +
+成功
+* FAILED = 1 +
+失败
+
+
+== 属性说明
+
+HandleError error [默认值: 1]::
+确认 xref:zh_CN/api/gd_cubism_user_model.adoc[] 的 _start_motion_ 函数、_start_random_motion_ 函数的调用是否成功。

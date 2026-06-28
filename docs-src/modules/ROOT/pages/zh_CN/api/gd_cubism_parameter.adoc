@@ -1,0 +1,79 @@
+= GDCubismParameter
+:encoding: utf-8
+:lang: zh_CN
+:author: MizunagiKB <mizukb@live.jp>
+:copyright: 2023 MizunagiKB
+:doctype: book
+:source-highlighter: highlight.js
+:icons: font
+:experimental:
+:stylesdir: ../../res/theme/css
+:stylesheet: mizunagi-works.css
+ifdef::env-github,env-vscode[]
+:adocsuffix: .adoc
+endif::env-github,env-vscode[]
+ifndef::env-github,env-vscode[]
+:adocsuffix: .html
+endif::env-github,env-vscode[]
+
+
+== 描述
+
+xref:zh_CN/api/gd_cubism_user_model.adoc[] 的 _get_parameters_ 函数返回的 _Array_ 中包含的元素。
+
+通过向此类的 _value_ 写入值，可以修改 Live2D 模型的 parameter。
+
+
+== 属性
+
+[cols="3",frame=none,grid=none]
+|===
+>|float <|<<id-property-default_value,default_value>> |[默认值: 0.0]
+>|bool <|<<id-property-hold,hold>> |[默认值: false]
+>|float <|<<id-property-maximum_value,maximum_value>> |[默认值: 0.0]
+>|float <|<<id-property-minimum_value,minimum_value>> |[默认值: 0.0]
+|===
+
+
+== 方法
+[cols="2",frame=none,grid=none]
+|===
+>|void <|reset()
+|===
+
+
+== 枚举
+enum Type::
+* NORMAL = 0
+* BLEND_SHAPE = 1
+
+
+== 属性说明
+
+[[id-property-default_value]]
+float default_value [默认值: 0.0]::
+此类所持有 parameter 的初始值。
+
+
+[[id-property-maximum_value]]
+float maximum_value [默认值: 0.0]::
+此类所持有 parameter 可设置的最大值。
+
+
+[[id-property-minimum_value]]
+float minimum_value [默认值: 0.0]::
+此类所持有 parameter 可设置的最小值。
+
+
+[[id-property-hold]]
+bool hold [默认值: false]::
+设为 true 时，即使设置了动作或表情，已设置的参数也会优先应用。
+
+
+== 方法说明
+
+[[id-method-reset]]
+void reset()::
+将当前设置的值重置为 _default_value_。
++
+同时解除 hold 状态。

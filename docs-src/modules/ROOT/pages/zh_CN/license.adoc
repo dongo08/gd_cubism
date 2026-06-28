@@ -1,0 +1,86 @@
+= 许可证
+:encoding: utf-8
+:lang: zh_CN
+:author: MizunagiKB <mizukb@live.jp>
+:copyright: 2023 MizunagiKB
+:doctype: book
+:source-highlighter: highlight.js
+:icons: font
+:experimental:
+:stylesdir: ./docs/res/theme/css
+:stylesheet: mizunagi-works.css
+ifdef::env-github,env-vscode[]
+:adocsuffix: .adoc
+endif::env-github,env-vscode[]
+ifndef::env-github,env-vscode[]
+:adocsuffix: .html
+endif::env-github,env-vscode[]
+
+
+ifdef::env-github,env-vscode[]
+link:LICENSE.adoc[日文] / link:LICENSE.en.adoc[英文]
+endif::env-github,env-vscode[]
+
+
+== 关于许可证
+
+本软件依赖以下软件，无法单独运行。
+
+Live2D Cubism SDK::
+用于运行 Live2D Editor 创建的文件所需的库。
+
+Live2D Cubism NativeFramework::
+使 SDK 更易于使用的库。
+
+因此，用户在构建过程中必须遵守以下内容。
+
+* link:https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html[Live2D Open Software License Agreement（英文）]
+* link:https://www.live2d.com/eula/live2d-open-software-license-agreement_jp.html[Live2D Open Software 使用許諾契約書（日文）]
+* link:https://www.live2d.com/eula/live2d-open-software-license-agreement_cn.html[Live2D Open Software 使用授权协议（中文）]
+
+此外，若公开发布使用 GDCubism 制作的应用程序，必须遵守以下协议。
+
+* link:https://www.live2d.com/eula/live2d-proprietary-software-license-agreement_en.html[Live2D Proprietary Software License Agreement（英文）]
+* link:https://www.live2d.com/eula/live2d-proprietary-software-license-agreement_jp.html[Live2D Proprietary Software 使用許諾契約書（日文）]
+* link:https://www.live2d.com/eula/live2d-proprietary-software-license-agreement_cn.html[Live2D Proprietary Software 使用授权协议（中文）]
+
+
+[IMPORTANT]
+====
+GDCubism 许可证的适用范围仅限于 GDCubism 仓库中公开的部分。
+请注意，构建后会生成与 Live2D 公司库链接的二进制文件。
+====
+
+
+=== 许可证信息
+==== Live2D Cubism SDK
+==== Cubism Native Framework
+
+关于 Live2D Cubism Components 和 CubismNativeFramework，请参考以下页面中的 license 信息。
+
+* link:https://github.com/Live2D/CubismNativeFramework[]
+
+
+==== GDCubism
+
+MIT License
+
+Copyright (c) 2023 MizunagiKB
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

@@ -1,0 +1,488 @@
+= GDCubismUserModel
+:encoding: utf-8
+:lang: zh_CN
+:author: MizunagiKB <mizukb@live.jp>
+:copyright: 2023 MizunagiKB
+:doctype: book
+:source-highlighter: highlight.js
+:icons: font
+:experimental:
+:stylesdir: ../../res/theme/css
+:stylesheet: mizunagi-works.css
+ifdef::env-github,env-vscode[]
+:adocsuffix: .adoc
+endif::env-github,env-vscode[]
+ifndef::env-github,env-vscode[]
+:adocsuffix: .html
+endif::env-github,env-vscode[]
+
+
+== 描述
+
+用于加载 Live2D 模型、生成显示所需的 _Texture_ 并执行各种操作的 _SubViewport_ 继承类。
+
+
+== 属性
+
+[cols="3",frame=none,grid=none]
+|===
+>|Vector2 <|<<id-property-adjust_position,adjust_position>> |[默认值: Vector2(0, 0)]
+>|float <|<<id-property-adjust_scale,adjust_scale>> |[默认值: 1.0]
+>|String <|<<id-property-assets,assets>> |[默认值: ""]
+>|bool <|<<id-property-auto_scale,auto_scale>> |[默认值: true]
+>|bool <|<<id-property-load_expressions,load_expressions>> |[默认值: true]
+>|bool <|<<id-property-load_motions,load_motions>> |[默认值: true]
+>|Vector2i <|<<id-property-mask_viewport_size>> |[默认值: Vector2i(0, 0)]
+>|ParameterMode <|<<id-property-parameter_mode,parameter_mode>> |[默认值: 0]
+>|bool <|<<physics_evaluate>> |[默认值: true]
+>|MotionProcessCallback <|<<id-property-playback_process_mode,playback_process_mode>> |[默认值: 1]
+>|bool <|<<pose_update>> |[默认值: true]
+>|Shader <|<<id-property-shader_add,shader_add>> |
+>|Shader <|<<id-property-shader_mask,shader_mask>> |
+>|Shader <|<<id-property-shader_mask_add,shader_mask_add>> |
+>|Shader <|<<id-property-shader_mask_add_inv,shader_mask_add_inv>> |
+>|Shader <|<<id-property-shader_mask_mix,shader_mask_mix>> |
+>|Shader <|<<id-property-shader_mask_mix_inv,shader_mask_mix_inv>> |
+>|Shader <|<<id-property-shader_mask_mul,shader_mask_mul>> |
+>|Shader <|<<id-property-shader_mask_mul_inv,shader_mask_mul_inv>> |
+>|Shader <|<<id-property-shader_mix,shader_mix>> |
+>|Shader <|<<id-property-shader_mul,shader_mul>> |
+>|float <|<<id-property-speed_scale,speed_scale>> |[默认值: 1.0]
+|===
+
+
+== 方法
+
+[cols="2",frame=none,grid=none]
+|===
+>|void <|advance(delta: float)
+>|void <|clear()
+>|moc3FileFormatVersion <|csm_get_latest_moc_version()
+>|moc3FileFormatVersion <|csm_get_moc_version()
+>|Dictionary <|csm_get_version()
+>|Dictionary <|get_canvas_info()
+>|Array <|get_cubism_motion_queue_entries()
+>|Array <|get_expressions()
+>|Array <|get_hit_areas()
+>|Dictionary <|get_meshes()
+>|Dictionary <|get_motions()
+>|Array <|get_parameters()
+>|Array <|get_part_opacities()
+>|void <|start_expression(expression_id: String)
+>|GDCubismMotionQueueEntryHandle <|start_motion(group: String, no: int, priority: Priority)
+>|GDCubismMotionQueueEntryHandle <|start_motion_loop(group: String, no: int, priority: Priority, loop: bool, loop_fade_in: bool)
+>|void <|stop_expression()
+>|void <|stop_motion()
+|===
+
+
+== 信号
+
+motion_event(value: String)::
+在 _Motion_ 中嵌入的事件时刻触发。
+
+.示例
+[source,gdscript]
+----
+func _on_motion_event(value: String):
+    print(value)
+
+func _ready():
+    $GDCubismUserModel.motion_event.connect(_on_motion_event)
+----
+
+motion_finished()::
+在 _Motion_ 播放结束时触发。
+
+.示例
+[source,gdscript]
+----
+func _on_motion_finished(value: String):
+    print(value)
+
+func _ready():
+    $GDCubismUserModel.motion_finished.connect(_on_motion_finished)
+----
+
+
+== 枚举
+
+[[id-enum-moc3_file_format_version]]
+enum moc3FileFormatVersion::
+* CSM_MOC_VERSION_UNKNOWN = 0 +
+未知或加载失败
+* CSM_MOC_VERSION_30 = 1 +
+moc3 文件版本 3.0.00 至 3.2.07
+* CSM_MOC_VERSION_33 = 2 +
+moc3 文件版本 3.3.00 至 3.3.03
+* CSM_MOC_VERSION_40 = 3 +
+moc3 文件版本 4.0.00 至 4.1.05
+* CSM_MOC_VERSION_42 = 4 +
+moc3 文件版本 4.2.00 至 4.2.02
+* CSM_MOC_VERSION_50 = 5 +
+moc3 文件版本 5.0.00 及以上
+
+
+[[id-enum-priority]]
+enum Priority::
+* PRIORITY_NONE = 0
+* PRIORITY_IDLE = 1
+* PRIORITY_NORMAL = 2
+* PRIORITY_FORCE = 3 +
+强制切换。
+
+
+enum ParameterMode::
+* FULL_PARAMETER = 0 +
+使用 <<id-method-start_motion,_start_motion_>> 函数播放 _Motion_ 时指定。 +
+此模式下不能通过 xref:zh_CN/api/gd_cubism_parameter.adoc[] 进行操作。
+* NONE_PARAMETER = 1 +
+使用 <<id-method-start_motion,_get_parameters_>> 函数获取的 xref:zh_CN/api/gd_cubism_parameter.adoc[] 来操作 Live2D 模型时指定。 +
+此模式下不能使用 <<id-method-start_motion,_start_motion_>> 函数播放动作。
+
+
+enum MotionProcessCallback::
+* PHYSICS = 0 +
+动画更新处理在 __physics_process_ 函数中进行。适用于需要与物理模拟交互的场景。
+* IDLE = 1 +
+动画更新处理在 __process_ 函数中进行。
+* MANUAL = 2 +
+不自动进行动画更新处理。处理动画需使用 <<id-method-advance,_advance_>> 函数。
+
+
+== 属性说明
+
+[[id-property-adjust_position]]
+Vector2 adjust_position [默认值: Vector2(0, 0)]::
+调整 Live2D 模型的绘制位置。 +
+GDCubism 在其自身的 SubViewport 内绘制 Live2D 模型。 +
+通过调整此参数可以特写 Live2D 模型的某一部分，或在 auto_scale 后绘制结果不理想时使用。
+
+
+[[id-property-adjust_scale]]
+float adjust_scale [默认值: 1.0]::
+调整 Live2D 模型的绘制大小。 +
+GDCubism 在其自身的 SubViewport 内绘制 Live2D 模型。 +
+通过调整此参数可以自由改变 Live2D 模型的绘制大小。
+
+
+[[id-property-assets]]
+String assets [默认值: ""]::
+指定 *.model3.json 扩展名的文件来加载 Live2D 模型。
+指定文件后会立即加载。 +
+如需切换 Live2D 模型，只需指定新文件即可切换。
+
+
+[[id-property-auto_scale]]
+bool auto_scale [默认值: true]::
+_GDCubismUserModel_ 会尝试让 Live2D 模型自适应其自身 _SubViewport_ 的大小。因此可能导致与模型制作者意图不一致的结果。 +
++
+取消勾选此项将以无缩放方式显示。
+
+
+[[id-property-load_expressions]]
+bool load_expressions [默认值: true]::
+设为 _false_ 时，加载 Live2D 模型时不加载 _Expression_。
+
+
+[[id-property-load_motions]]
+bool load_motions [默认值: true]::
+设为 _false_ 时，加载 Live2D 模型时不加载 _Motion_。
+
+
+[[id-property-mask_viewport_size]]
+Vector2i mask_viewport_size [默认值: Vector2i(0, 0)]::
+指定 Live2D 模型需要遮罩图像时的分辨率。
++
+x、y 任一为 0 时，使用与 GDCubismUserModel 设置的 Viewport 相同的尺寸。
++
+降低分辨率可减少 GPU 内存消耗。如果小于 512x512 左右，根据遮罩的应用位置可能会出现画质问题。
++
+此图像的宽高比应与 GDCubismUserModel 的 Viewport 比例一致。例如 1024x512 应使用 512x256 或 128x64 等数值。
++
+GDCubism 基于与 Viewport 相同比例的假设进行绘制，错误的比值将得不到理想结果。
+
+
+[[id-property-parameter_mode]]
+ParameterMode parameter_mode [默认值: 0]::
+指定当前 Live2D 模型的控制方式。
+
+
+[[id-property-physics_evaluate]]
+bool physics_evaluate [默认值: true]::
+设为 _false_ 时，不进行物理计算。
+
+
+[[id-property-playback_process_mode]]
+MotionProcessCallback playback_process_mode [默认值: 1]::
+指定当前 Live2D 模型的播放方式。
+
+
+[[id-property-pose_update]]
+bool pose_update [默认值: true]::
+设为 _false_ 时，不对姿态组中指定的绘制部件之间进行透明度计算。 +
+如需手动进行所有透明度计算，请设为 _false_。
+
+
+[[id-property-shader_add]]
+Shader shader_add::
+指定 Live2D 模型绘制时使用的 _shader_。 +
+默认使用以下内容的 _shader_。
+
+[source,,numlines]
+----
+include::example$2d_cubism_norm_add.gdshader[]
+----
+
+
+[[id-property-shader_mask]]
+Shader shader_mask::
+指定 Live2D 模型绘制时使用的 _shader_。 +
+默认使用以下内容的 _shader_。
+
+[source,,numlines]
+----
+include::example$2d_cubism_mask.gdshader[]
+----
+
+
+[[id-property-shader_mask_add]]
+Shader shader_mask_add::
+指定 Live2D 模型绘制时使用的 _shader_。 +
+默认使用以下内容的 _shader_。
+
+[source,,numlines]
+----
+include::example$2d_cubism_mask_add.gdshader[]
+----
+
+
+[[id-property-shader_mask_add_inv]]
+Shader shader_mask_add_inv::
+指定 Live2D 模型绘制时使用的 _shader_。 +
+默认使用以下内容的 _shader_。
+
+[source,,numlines]
+----
+include::example$2d_cubism_mask_add_inv.gdshader[]
+----
+
+
+[[id-property-shader_mask_mix]]
+Shader shader_mask_mix::
+指定 Live2D 模型绘制时使用的 _shader_。 +
+默认使用以下内容的 _shader_。
+
+[source,,numlines]
+----
+include::example$2d_cubism_mask_mix.gdshader[]
+----
+
+
+[[id-property-shader_mask_mix_inv]]
+Shader shader_mask_mix_inv::
+指定 Live2D 模型绘制时使用的 _shader_。 +
+默认使用以下内容的 _shader_。
+
+[source,,numlines]
+----
+include::example$2d_cubism_mask_mix_inv.gdshader[]
+----
+
+
+[[id-property-shader_mask_mul]]
+Shader shader_mask_mul::
+指定 Live2D 模型绘制时使用的 _shader_。 +
+默认使用以下内容的 _shader_。
+
+[source,,numlines]
+----
+include::example$2d_cubism_mask_mul.gdshader[]
+----
+
+
+[[id-property-shader_mask_mul_inv]]
+Shader shader_mask_mul_inv::
+指定 Live2D 模型绘制时使用的 _shader_。 +
+默认使用以下内容的 _shader_。
+
+[source,,numlines]
+----
+include::example$2d_cubism_mask_mul_inv.gdshader[]
+----
+
+
+[[id-property-shader_mix]]
+Shader shader_mix::
+指定 Live2D 模型绘制时使用的 _shader_。 +
+默认使用以下内容的 _shader_。
+
+[source,,numlines]
+----
+include::example$2d_cubism_norm_mix.gdshader[]
+----
+
+
+[[id-property-shader_mul]]
+Shader shader_mul::
+指定 Live2D 模型绘制时使用的 _shader_。 +
+默认使用以下内容的 _shader_。
+
+[source,,numlines]
+----
+include::example$2d_cubism_norm_mul.gdshader[]
+----
+
+
+[[id-property-speed_scale]]
+float speed_scale [默认值: 1.0]::
+指定当前 Live2D 模型的播放速度。
+
+
+== 方法说明
+
+[[id-method-advance]]
+void advance(delta: float)::
+将动画推进指定的 _delta_ 时间（单位为秒）。
++
+delta 请指定 0.0 以上的值。
+
+
+[[id-method-clear]]
+void clear()::
+此函数为提高操作一致性已被移除。 +
+如需相同操作，请将 _assets_ 属性设置为 ""。
+
+
+[[id-method-csm_get_latest_moc_version]]
+<<id-enum-moc3_file_format_version,moc3FileFormatVersion>> csm_get_latest_moc_version()::
+返回 GDCubismUserModel 可读取的最新文件版本。
+
+
+[[id-method-csm_get_moc_version]]
+<<id-enum-moc3_file_format_version,moc3FileFormatVersion>> csm_get_moc_version()::
+返回已加载的 moc3 文件的版本。
+
+
+[[id-method-csm_get_version]]
+Dictionary csm_get_version()::
+以 _Dictionary_ 形式返回 GDCubism 使用的 Cubism Native SDK Core 的版本号。 +
++
+version: int:::
+_csmVersion_ 函数返回的原始值。
+major: int:::
+从 version 中提取的主版本号。
+minor: int:::
+从 version 中提取的次版本号。
+patch: int:::
+从 version 中提取的补丁编号。
+
+
+[[id-method-get_canvas_info]]
+Dictionary get_canvas_info()::
+以 _Dictionary_ 形式返回以下信息。 +
++
+size_in_pixels: Vector2:::
+已加载 Live2D 模型画布的宽度和高度（像素数）。
+origin_in_pixels: Vector2:::
+已加载 Live2D 模型的中心位置（像素数）。
+pixels_per_unit: float:::
+已加载 Live2D 模型的 _pixelsPerUnit_。
+
+
+[[id-method-get_cubism_motion_queue_entries]]
+Array get_cubism_motion_queue_entries()::
+返回当前正在播放的 _Motion_ 信息。
+
+
+[[id-method-get_expressions]]
+Array get_expressions()::
+返回当前 Live2D 模型的 _Expression_ 列表。
++
+获取的信息可作为 _start_expression_ 函数的参数使用。
+
+
+[[id-method-get_hit_areas]]
+Array get_hit_areas()::
+获取 Live2D 模型中设置的 _HitArea_ 信息。 +
+数组元素为 _Dictionary_，包含 _id_ 和 _name_。 +
++
+_id_ 指向 _mesh_ 元素，可用作 _get_meshes_ 的键。 +
++
+使用此函数与 _get_meshes_ 获取的信息可以实现与 Live2D 模型的交互。 +
+不需要高级处理时，使用 _GDCubismEffectHitArea_ 类可以更简单地实现。
+
+
+[[id-method-get_meshes]]
+Dictionary get_meshes()::
+获取当前 Motion 状态下使用的 _MeshInstance_ 的 _ArrayMesh_ 信息。 +
++
+此 _Dictionary_ 的键与 _GDCubismUserModel_ 生成的 _MeshInstance_ 名称一致。获取的信息是内部使用的 _ArrayMesh_。
++
+可以按以下方式使用。
+
+[source, gdscript]
+----
+var dict_mesh: Dictionary = model.get_meshes()
+var ary_mesh: ArrayMesh = dict_mesh[art_mesh_name]
+var ary_surface: Array = ary_mesh.surface_get_arrays(0)
+
+var mesh_vertex: PackedVector2Array = ary_surface[ArrayMesh.ARRAY_VERTEX]
+var mesh_tex_uv: PackedVector2Array = ary_surface[ArrayMesh.ARRAY_TEX_UV]
+var mesh_index: PackedInt32Array = ary_surface[ArrayMesh.ARRAY_INDEX]
+----
+
+CAUTION: _get_meshes_ 是 v0.1 中添加的实验性函数。请注意未来可能更改或删除。
+
+
+[[id-method-get_motions]]
+Dictionary get_motions()::
+返回当前 Live2D 模型的 _Motion_ 列表。 +
+返回的 _Dictionary_ 包含 _group_ 及其包含的动作数量。
++
++
+枚举所有动作时，可按以下方式编写。
+
+[source, gdscript]
+----
+var dict_motion = $GDCubismUserModel.get_motions()
+for group in dict_motion.keys():
+    for no in dict_motion[group]:
+        print("group: %s, no: %d" % [group, no])
+----
+
+
+[[id-method-get_parameters]]
+Array get_parameters()::
+获取用于操作当前 Live2D 模型的类。
+
+
+[[id-method-get_part_opacities]]
+Array get_part_opacities()::
+获取用于操作当前 Live2D 模型部件透明度的类。
+
+
+[[id-method-start_expression]]
+void start_expression(expression_id: String)::
+播放指定的 _expression_id_。
+
+
+[[id-method-start_motion]]
+xref:zh_CN/api/gd_cubism_motion_queue_entry_handle.adoc[] start_motion(group: String, no: int, priority: <<id-enum-priority,Priority>>)::
+播放指定 _group_ 和 _no_ 的 _Motion_。
+
+
+[[id-method-start_motion_loop]]
+xref:zh_CN/api/gd_cubism_motion_queue_entry_handle.adoc[] start_motion_loop(group: String, no: int, priority: <<id-enum-priority,Priority>>)::
+播放指定 _group_ 和 _no_ 的 _Motion_。 +
++
+需要循环播放时指定。_loop_ 参数为 _false_ 时，与 _start_motion_ 函数行为相同。
+
+[[id-method-stop_expression]]
+void stop_expression()::
+停止当前正在播放的 _Expression_。
+
+
+[[id-method-stop_motion]]
+void stop_motion()::
+停止当前正在播放的 _Motion_。

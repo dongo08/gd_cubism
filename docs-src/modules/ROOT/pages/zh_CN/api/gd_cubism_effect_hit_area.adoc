@@ -1,0 +1,90 @@
+= GDCubismEffectHitArea
+:encoding: utf-8
+:lang: zh_CN
+:author: MizunagiKB <mizukb@live.jp>
+:copyright: 2023 MizunagiKB
+:doctype: book
+:source-highlighter: highlight.js
+:icons: font
+:experimental:
+:stylesdir: ../../res/theme/css
+:stylesheet: mizunagi-works.css
+ifdef::env-github,env-vscode[]
+:adocsuffix: .adoc
+endif::env-github,env-vscode[]
+ifndef::env-github,env-vscode[]
+:adocsuffix: .html
+endif::env-github,env-vscode[]
+
+
+== 描述
+
+作为 xref:zh_CN/api/gd_cubism_user_model.adoc[] 的子元素配置后，可以处理 Live2D 模型中设置的 _HitArea_。
+
+_HitArea_ 由任意 _Triangle_ 构成，因此可以表达复杂的形状。但在 _GDCubismEffectHitArea_ 类中，会作为包含构成 _Triangle_ 的顶点的包围盒（_Rect2_）来处理。
+
+如果需要以 _Triangle_ 为单位进行判定，可以在接收到 _hit_area_entered_ 信号后使用 _get_detail_ 函数。
+
+
+== 属性
+
+[cols="3",frame=none,grid=none]
+|===
+>|bool <|monitoring |[默认值: true]
+|===
+
+
+== 方法
+
+[cols="2",frame=none,grid=none]
+|===
+>|Dictionary <|get_detail(model: GDCubismUserModel, id: String)
+>|Vector2 <|get_target()
+>|void <|set_target(target: Vector2)
+|===
+
+
+== 信号
+
+hit_area_entered(model: GDCubismUserModel, id: String)::
+当 _set_target_ 指定的点位于 Live2D 模型的 _HitArea_ 内时调用。 +
+根据 _monitoring_ 的状态，行为变化如下：
+* _true_ 时 ... 调用一次后，直到 _set_target_ 离开 _HitArea_ 范围前不会再次调用。
+* _false_ 时 ... 只要 _set_target_ 在 _HitArea_ 内，就会持续调用。
+
+hit_area_exited(model: GDCubismUserModel, id: String)::
+_hit_area_entered_ 被调用后，当 _set_target_ 移动到 _HitArea_ 范围外时调用。 +
+无论 _minitoring_ 状态如何，此信号在 _hit_area_entered_ 调用后仅触发一次。
+
+
+== 枚举
+== 常量
+== 属性说明
+
+bool monitoring [默认值: true]::
+切换 _hit_area_entered_ 信号的行为模式。
+
+
+== 方法说明
+
+Dictionary get_detail(model: GDCubismUserModel, id: String)::
+在 _hit_area_entered_ 时获取更详细的信息。 +
+获取的信息根据 _set_target_ 指定的点与 _id_ 指定的 _mesh_ 的判定结果，有以下三种状态。
+
+_Dictionary_ 中不包含任何内容:::
+_set_target_ 指定的位置没有任何东西。
+
+_Dictionary_ 中包含 _rect: Rect2_:::
+_set_target_ 指定的位置在 _rect_ 范围内，但不在 _Triangle_ 内。
+
+_Dictionary_ 中包含 _rect: Rect2_ 和 _vertices: Array_:::
+_set_target_ 指定的位置在 _rect_ 内且在 _Triangle_ 内。
+
+
+Vector2 get_target()::
+获取 _set_target_ 指定的点。
+
+void set_target(target: Vector2)::
+检测指定坐标与 HitArea 的接触。 +
+调用 _set_target_ 一次被视为点击操作。 +
+连续调用被视为拖拽操作。

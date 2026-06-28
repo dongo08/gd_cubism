@@ -1,0 +1,39 @@
+= GDCubismEffect
+:encoding: utf-8
+:lang: zh_CN
+:author: MizunagiKB <mizukb@live.jp>
+:copyright: 2023 MizunagiKB
+:doctype: book
+:source-highlighter: highlight.js
+:icons: font
+:experimental:
+:stylesdir: ../../res/theme/css
+:stylesheet: mizunagi-works.css
+ifdef::env-github,env-vscode[]
+:adocsuffix: .adoc
+endif::env-github,env-vscode[]
+ifndef::env-github,env-vscode[]
+:adocsuffix: .html
+endif::env-github,env-vscode[]
+
+
+== 描述
+== 属性
+
+[cols="3",frame=none,grid=none]
+|===
+>|bool <|active |[默认值: true]
+|===
+
+
+== 方法
+== 信号
+== 枚举
+== 常量
+== 属性说明
+
+bool active [默认值: true]::
+此值为 _true_ 时，会调用 __cubism_prologue_、__cubism_process_、__cubism_epilogue_ 函数。
+
+
+== 方法说明
